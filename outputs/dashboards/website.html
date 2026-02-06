@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIDAI Financial Inclusion Scout - Dynamic Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        /* Navigation */
+        nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #667eea;
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 80px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        /* Section */
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #e2e8f0;
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        th {
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        
+        /* Badge */
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-medium { background: rgba(251, 191, 36, 0.2); color: #fcd34d; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .badge-low { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
+        
+        /* Chart */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            background: rgba(255,255,255,0.02);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 100px;
+            font-size: 1.5rem;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Button */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Search */
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255,255,255,0.08);
+        }
+        
+        /* Model Cards */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .model-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s;
+        }
+        .model-card:hover {
+            transform: translateY(-10px);
+        }
+        .model-header {
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .model-header h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .model-body {
+            padding: 30px;
+        }
+        .model-body ul {
+            list-style: none;
+            padding: 0;
+        }
+        .model-body li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #94a3b8;
+        }
+        .model-body li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const API_BASE = 'http://localhost:5001/api';
+
+        function App() {
+            const [activeSection, setActiveSection] = useState('home');
+            const [stats, setStats] = useState(null);
+            const [districts, setDistricts] = useState([]);
+            const [topRisk, setTopRisk] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [searchTerm, setSearchTerm] = useState('');
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                fetchData();
+            }, []);
+
+            useEffect(() => {
+                if (activeSection === 'analytics' && stats && chartRef.current) {
+                    renderChart();
+                }
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [activeSection, stats]);
+
+            const fetchData = async () => {
+                try {
+                    const [statsRes, districtsRes, topRiskRes] = await Promise.all([
+                        fetch(`${API_BASE}/stats`),
+                        fetch(`${API_BASE}/districts`),
+                        fetch(`${API_BASE}/top-risk`)
+                    ]);
+
+                    const statsData = await statsRes.json();
+                    const districtsData = await districtsRes.json();
+                    const topRiskData = await topRiskRes.json();
+
+                    setStats(statsData);
+                    setDistricts(districtsData);
+                    setTopRisk(topRiskData);
+                    setLoading(false);
+                } catch (err) {
+                    console.error('API Error:', err);
+                    setLoading(false);
+                }
+            };
+
+            const renderChart = () => {
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                const ctx = chartRef.current.getContext('2d');
+                chartInstance.current = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                        datasets: [{
+                            data: [stats.high_risk, stats.medium_risk, stats.low_risk],
+                            backgroundColor: ['rgba(239, 68, 68, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(34, 197, 94, 0.8)'],
+                            borderColor: ['rgba(239, 68, 68, 1)', 'rgba(251, 191, 36, 1)', 'rgba(34, 197, 94, 1)'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#e2e8f0', font: { size: 14 } }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const filteredDistricts = districts.filter(d => 
+                d.district_clean.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            if (loading) {
+                return (
+                    <div className="loading">
+                        <div className="spinner"></div>
+                        Loading Dynamic Dashboard...
+                    </div>
+                );
+            }
+
+            return (
+                <>
+                    <nav>
+                        <div className="nav-container">
+                            <div className="logo">🏛️ UIDAI Scout</div>
+                            <div className="nav-links">
+                                <span className={`nav-link ${activeSection === 'home' ? 'active' : ''}`} onClick={() => setActiveSection('home')}>Home</span>
+                                <span className={`nav-link ${activeSection === 'models' ? 'active' : ''}`} onClick={() => setActiveSection('models')}>Models</span>
+                                <span className={`nav-link ${activeSection === 'districts' ? 'active' : ''}`} onClick={() => setActiveSection('districts')}>Districts</span>
+                                <span className={`nav-link ${activeSection === 'analytics' ? 'active' : ''}`} onClick={() => setActiveSection('analytics')}>Analytics</span>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {activeSection === 'home' && (
+                        <>
+                            <div className="hero">
+                                <h1>Financial Inclusion Scout</h1>
+                                <p>Aadhaar Early-Warning Intelligence System</p>
+                                <p style={{fontSize: '1rem', marginTop: '10px'}}>UIDAI ID: UIDAI_12208 | Real-time Data from {stats.total_districts} Districts</p>
+                            </div>
+
+                            <div className="container">
+                                <div className="stats-grid">
+                                    <div className="stat-card">
+                                        <div className="stat-icon">🏛️</div>
+                                        <div className="stat-value">{stats.total_districts}</div>
+                                        <div className="stat-label">Total Districts</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-icon">🔴</div>
+                                        <div className="stat-value">{stats.high_risk}</div>
+                                        <div className="stat-label">High Risk</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-icon">🟡</div>
+                                        <div className="stat-value">{stats.medium_risk}</div>
+                                        <div className="stat-label">Medium Risk</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-icon">🟢</div>
+                                        <div className="stat-value">{stats.low_risk}</div>
+                                        <div className="stat-label">Low Risk</div>
+                                    </div>
+                                </div>
+
+                                <div className="section">
+                                    <h2>🚨 Top 10 High-Risk Districts</h2>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>District</th>
+                                                <th>Risk Score</th>
+                                                <th>Level</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {topRisk.map((d, i) => (
+                                                <tr key={i}>
+                                                    <td><strong>#{i + 1}</strong></td>
+                                                    <td>{d.district_clean}</td>
+                                                    <td>{d.risk_score.toFixed(3)}</td>
+                                                    <td>
+                                                        <span className={`badge badge-${d.risk_level.toLowerCase()}`}>
+                                                            {d.risk_level}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {activeSection === 'models' && (
+                        <div className="container">
+                            <h2 style={{fontSize: '2.5rem', marginBottom: '40px', textAlign: 'center'}}>Three-Model AI Pipeline</h2>
+                            <div className="model-grid">
+                                <div className="model-card">
+                                    <div className="model-header">
+                                        <h3>Model 1</h3>
+                                        <p>Anomaly Detection</p>
+                                    </div>
+                                    <div className="model-body">
+                                        <ul>
+                                            <li>Rolling Z-score technique</li>
+                                            <li>Monitors 4 key signals</li>
+                                            <li>229 anomalies detected</li>
+                                            <li>25% detection rate</li>
+                                        </ul>
+                                        <a href="model1_visuals/MODEL1_COMPREHENSIVE_DASHBOARD.png" target="_blank" className="btn" style={{marginTop: '20px', width: '100%', textAlign: 'center'}}>View Dashboard</a>
+                                    </div>
+                                </div>
+                                <div className="model-card">
+                                    <div className="model-header">
+                                        <h3>Model 2</h3>
+                                        <p>Risk Scoring</p>
+                                    </div>
+                                    <div className="model-body">
+                                        <ul>
+                                            <li>Composite risk index</li>
+                                            <li>5 normalized indicators</li>
+                                            <li>{stats.high_risk} high-risk districts</li>
+                                            <li>3-tier classification</li>
+                                        </ul>
+                                        <a href="model2_visuals/MODEL2_COMPREHENSIVE_DASHBOARD.png" target="_blank" className="btn" style={{marginTop: '20px', width: '100%', textAlign: 'center'}}>View Dashboard</a>
+                                    </div>
+                                </div>
+                                <div className="model-card">
+                                    <div className="model-header">
+                                        <h3>Model 3</h3>
+                                        <p>Risk Classification</p>
+                                    </div>
+                                    <div className="model-body">
+                                        <ul>
+                                            <li>Rule-based system</li>
+                                            <li>4 risk types identified</li>
+                                            <li>Explainable reasoning</li>
+                                            <li>Policy recommendations</li>
+                                        </ul>
+                                        <a href="model3_visuals/MODEL3_COMPREHENSIVE_DASHBOARD.png" target="_blank" className="btn" style={{marginTop: '20px', width: '100%', textAlign: 'center'}}>View Dashboard</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'districts' && (
+                        <div className="container">
+                            <div className="section">
+                                <h2>🗺️ All Districts ({filteredDistricts.length})</h2>
+                                <input 
+                                    type="text"
+                                    className="search-box"
+                                    placeholder="Search districts..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <div style={{maxHeight: '600px', overflowY: 'auto'}}>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>District</th>
+                                                <th>Risk Score</th>
+                                                <th>Risk Level</th>
+                                                <th>Bio Coverage</th>
+                                                <th>Demo Coverage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredDistricts.slice(0, 50).map((d, i) => (
+                                                <tr key={i}>
+                                                    <td>{i + 1}</td>
+                                                    <td><strong>{d.district_clean}</strong></td>
+                                                    <td>{d.risk_score.toFixed(3)}</td>
+                                                    <td>
+                                                        <span className={`badge badge-${d.risk_level.toLowerCase()}`}>
+                                                            {d.risk_level}
+                                                        </span>
+                                                    </td>
+                                                    <td>{d.total_bio.toLocaleString()}</td>
+                                                    <td>{d.total_demo.toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p style={{marginTop: '15px', color: '#94a3b8', fontSize: '0.9rem'}}>
+                                    Showing {Math.min(50, filteredDistricts.length)} of {filteredDistricts.length} districts
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'analytics' && (
+                        <div className="container">
+                            <div className="section">
+                                <h2>📈 Risk Analytics</h2>
+                                <div className="stats-grid">
+                                    <div className="stat-card">
+                                        <div className="stat-label">Average Risk Score</div>
+                                        <div className="stat-value">{stats.avg_risk_score.toFixed(3)}</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-label">High Risk %</div>
+                                        <div className="stat-value">{((stats.high_risk / stats.total_districts) * 100).toFixed(1)}%</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-label">Medium Risk %</div>
+                                        <div className="stat-value">{((stats.medium_risk / stats.total_districts) * 100).toFixed(1)}%</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-label">Low Risk %</div>
+                                        <div className="stat-value">{((stats.low_risk / stats.total_districts) * 100).toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                                <div className="chart-container">
+                                    <canvas ref={chartRef}></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

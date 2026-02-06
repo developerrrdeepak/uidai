@@ -1,13 +1,3 @@
-# Large Data Files
-*.csv
-api_data_*.csv
-aadhaar_*_cleaned.csv
-
-# Model Files
-*.pkl
-*.h5
-*.joblib
-
 # Python
 __pycache__/
 *.py[cod]
@@ -36,21 +26,41 @@ wheels/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# IDEs
-.vscode/
+# PyCharm
 .idea/
-*.swp
-*.swo
-*~
+
+# VS Code
+.vscode/
+
+# Data files (keep structure, ignore large files)
+data/raw/*.csv
+*.pkl
+*.h5
+*.hdf5
+
+# Model files
+models/*.pkl
+models/*.h5
+
+# Logs
+*.log
+logs/
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Logs
-*.log
-
 # Temporary files
 *.tmp
-*.temp
+*.bak
+*.swp
+*~
+
+# Environment
+.env
+.env.local
+
+# Output
+output/
+temp/

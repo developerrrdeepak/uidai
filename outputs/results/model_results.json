@@ -1,0 +1,18 @@
+{
+  "Logistic Regression": {
+    "accuracy": 1.0,
+    "f1_score": 0.0
+  },
+  "Random Forest": {
+    "accuracy": 1.0,
+    "f1_score": 0.0
+  },
+  "Gradient Boosting": {
+    "accuracy": 1.0,
+    "f1_score": 0.0
+  },
+  "Decision Tree": {
+    "accuracy": 1.0,
+    "f1_score": 0.0
+  }
+}
